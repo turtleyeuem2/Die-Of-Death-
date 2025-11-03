@@ -397,27 +397,32 @@ end; })
 
 
 
+local LP = game:GetService("Players").LocalPlayer
+
 local AbilityNames = {"Cloak","Punch","Taunt","BonusPad","Block","Caretaker","Dash","Hotdog","Revolver","Adrenaline","Banana"}
 
 local AbilityDatas = {
-    ["Adrenaline"] = {Name = "Adrenaline",InputShown = "",Tip = "Get a temporary speed boost for 6 seconds, highlighting you to your teamates and slowing you down after it\'s over.",Cooldown = 35,Icon = "rbxassetid://116399911657417",DisplayName = "Adrenaline"};
-    ["Punch"] = {Name = "Punch",InputShown = "",Tip = "Swing foward stunning any killers hit for 3 seconds, if missed you\'ll get severe endlag.",Cooldown = 40,Icon = "rbxassetid://97428323453639",DisplayName = "Punch"};
+    ["Adrenaline"] = {Name = "Adrenaline",InputShown = "",Tip = "Get a temporary speed boost for 6 seconds, highlighting you to your teamates and slowing you down after it's over.",Cooldown = 35,Icon = "rbxassetid://116399911657417",DisplayName = "Adrenaline"};
+    ["Punch"] = {Name = "Punch",InputShown = "",Tip = "Swing forward stunning any killers hit for 3 seconds, if missed you'll get severe endlag.",Cooldown = 40,Icon = "rbxassetid://97428323453639",DisplayName = "Punch"};
     ["Caretaker"] = {Name = "Caretaker",InputShown = "",Tip = "Splash a potion infront of you, any survivors hit will heal 20 HP in total. Having this ability makes you lose 75 max health though!",Cooldown = 30,Icon = "rbxassetid://90712805517714",DisplayName = "Caretaker"};
     ["Cloak"] = {Name = "Cloak",InputShown = "",Tip = "Becoming heavily slowed but invisible for a short amount of time, Killers can still hit you though!",Cooldown = 50,Icon = "rbxassetid://90476367580326",DisplayName = "Cloak"};
     ["Block"] = {Name = "Block",InputShown = "",Tip = "Try blocking any form of damage, if successful heal 10 HP, get a speed boost and negate all the damage.",Cooldown = 40,Icon = "rbxassetid://120929805037270",DisplayName = "Block"};
-    ["Dash"] = {Name = "Dash",InputShown = "",Tip = "Dash foward, after you will get fatigue for 2 seconds which slows stamina regeneration and makes it drain faster.",Cooldown = 20,Icon = "rbxassetid://73777691791017",DisplayName = "Dash"};
+    ["Dash"] = {Name = "Dash",InputShown = "",Tip = "Dash forward, after you will get fatigue for 2 seconds which slows stamina regeneration and makes it drain faster.",Cooldown = 20,Icon = "rbxassetid://73777691791017",DisplayName = "Dash"};
     ["BonusPad"] = {Name = "BonusPad",InputShown = "",Tip = "Build a temporary speed pad that speeds up any survivor who steps on it. Having this ability makes you lose 10 max health though!",Cooldown = 70,Icon = "rbxassetid://86775625332300",DisplayName = "BonusPad"};
     ["Hotdog"] = {Name = "Hotdog",InputShown = "",Tip = "Eat a hotdog, healing 15 HP at the cost of 10 stamina.",Cooldown = 15,Icon = "rbxassetid://134322360499381",DisplayName = "Hotdog"};
-    ["Revolver"] = {Name = "Revolver",InputShown = "",Tip = "Shoot with your revolver stunning any killers hit for 2 seconds, you\'ll have to reload after. Having this ability makes you lose 20 max stamina though!",Cooldown = 15,Icon = "rbxassetid://107624957891469",DisplayName = "Revolver"};
-    ["Taunt"] = {Name = "Taunt",InputShown = "",Tip = "Taunt the killer gaining a forcefield, highlighting the killer, and slowing them down for 5 seconds or until you\'re hit for the duration of the effect (1.25x damage).",Cooldown = 25,Icon = "rbxassetid://85436299122876",DisplayName = "Taunt"};
+    ["Revolver"] = {Name = "Revolver",InputShown = "",Tip = "Shoot with your revolver stunning any killers hit for 2 seconds, you'll have to reload after. Having this ability makes you lose 20 max stamina though!",Cooldown = 15,Icon = "rbxassetid://107624957891469",DisplayName = "Revolver"};
+    ["Taunt"] = {Name = "Taunt",InputShown = "",Tip = "Taunt the killer gaining a forcefield, highlighting the killer, and slowing them down for 5 seconds or until you're hit for the duration of the effect (1.25x damage).",Cooldown = 25,Icon = "rbxassetid://85436299122876",DisplayName = "Taunt"};
     ["Banana"] = {Name = "Banana",InputShown = "",Tip = "Toss a banana onto the floor, if the killer or the civilian who made it touch the banana, they will slip and be briefly stunned, the banana will naturally decay over time.",Cooldown = 20,Icon = "rbxassetid://96202444819611",DisplayName = "Banana Peel"};
 }
 
+local AbilityModule
 pcall(function()
-AbilityModule = require(LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MainGui"):WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("Ability"))
+    AbilityModule = require(LP:WaitForChild("PlayerGui"):WaitForChild("MainGui"):WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("Ability"))
 end)
+
+local UIModule
 pcall(function()
-UIModule = require(LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MainGui"):WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("UI"))
+    UIModule = require(LP:WaitForChild("PlayerGui"):WaitForChild("MainGui"):WaitForChild("Client"):WaitForChild("Modules"):WaitForChild("UI"))
 end)
 
 local Tab_3 = Window:CreateTab("Abilities",0)
@@ -426,81 +431,72 @@ Tab_3:CreateSection("Get Ability")
 
 local ChoosenAbility = "Block"
 Tab_3:CreateDropdown({Name = "Choose Ability"; Options = AbilityNames; CurrentOption = "Block"; MultiSelection = false; Callback = function(Value)
-ChoosenAbility = ConvertDropdownValue(Value)
+    ChoosenAbility = ConvertDropdownValue(Value)
 end; })
+
 Tab_3:CreateButton({Name = "Get Choosen Ability"; Callback = function()
-game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer(ChoosenAbility)
-AbilityModule.CreateAbility(AbilityDatas[ChoosenAbility])
+    game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer(ChoosenAbility)
+    AbilityModule.CreateAbility(AbilityDatas[ChoosenAbility])
 end; })
 
 Tab_3:CreateButton({Name = "Get All Abilities"; Callback = function()
-game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer(unpack({{tostring(AbilityNames[math.random(1, 11)]);tostring(AbilityNames[math.random(1, 11)]);}}))
-for _,ability in pairs(AbilityNames) do
-game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer(unpack({{tostring(ability);}}))
-AbilityModule.CreateAbility(AbilityDatas[tostring(ability)])
-end
+    game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer(unpack({{tostring(AbilityNames[math.random(1, 11)]);tostring(AbilityNames[math.random(1, 11)]};}}))
+    for _,ability in pairs(AbilityNames) do
+        game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RemoteEvents"):WaitForChild("AbilitySelection"):FireServer(unpack({{tostring(ability);}}))
+        AbilityModule.CreateAbility(AbilityDatas[tostring(ability)])
+    end
 end; })
 
 Tab_3:CreateSection("Get Cards")
-
 local CardSettings = {
     [1] = {[1]="Revolver",[2]="Caretaker"},
     [2] = {[1]="BonusPad",[2]="Caretaker"},
-    [3] = {[1]="Revolver",[2]="Punch"},
-    [4] = {[1]="Dash",[2]="Punch"}
+    [3] = {[1]="Revolver",[2]="Punch"}
 }
+
 Tab_3:CreateLabel("First Card Settings")
 Tab_3:CreateDropdown({Name = "First Ability"; Options = AbilityNames; CurrentOption = "Revolver"; MultiSelection = false; Callback = function(Value)
-CardSettings[1][1] = ConvertDropdownValue(Value)
+    CardSettings[1][1] = ConvertDropdownValue(Value)
 end; })
 Tab_3:CreateDropdown({Name = "Second Ability"; Options = AbilityNames; CurrentOption = "Caretaker"; MultiSelection = false; Callback = function(Value)
-CardSettings[1][2] = ConvertDropdownValue(Value)
+    CardSettings[1][2] = ConvertDropdownValue(Value)
 end; })
 
 Tab_3:CreateLabel("Second Card Settings")
 Tab_3:CreateDropdown({Name = "First Ability"; Options = AbilityNames; CurrentOption = "BonusPad"; MultiSelection = false; Callback = function(Value)
-CardSettings[2][1] = ConvertDropdownValue(Value)
+    CardSettings[2][1] = ConvertDropdownValue(Value)
 end; })
 Tab_3:CreateDropdown({Name = "Second Ability"; Options = AbilityNames; CurrentOption = "Caretaker"; MultiSelection = false; Callback = function(Value)
-CardSettings[2][2] = ConvertDropdownValue(Value)
+    CardSettings[2][2] = ConvertDropdownValue(Value)
 end; })
 
 Tab_3:CreateLabel("Third Card Settings")
 Tab_3:CreateDropdown({Name = "First Ability"; Options = AbilityNames; CurrentOption = "Revolver"; MultiSelection = false; Callback = function(Value)
-CardSettings[3][1] = ConvertDropdownValue(Value)
+    CardSettings[3][1] = ConvertDropdownValue(Value)
 end; })
 Tab_3:CreateDropdown({Name = "Second Ability"; Options = AbilityNames; CurrentOption = "Punch"; MultiSelection = false; Callback = function(Value)
-CardSettings[3][2] = ConvertDropdownValue(Value)
+    CardSettings[3][2] = ConvertDropdownValue(Value)
 end; })
 
-Tab_3:CreateLabel("Fourth Card Settings")
-Tab_3:CreateDropdown({Name = "First Ability"; Options = AbilityNames; CurrentOption = "Dash"; MultiSelection = false; Callback = function(Value)
-CardSettings[4][1] = ConvertDropdownValue(Value)
+Tab_3:CreateButton({Name = "Summon Chosen Cards"; Callback = function()
+    UIModule.AbilitySelection(unpack(CardSettings))
 end; })
-Tab_3:CreateDropdown({Name = "Second Ability"; Options = AbilityNames; CurrentOption = "Punch"; MultiSelection = false; Callback = function(Value)
-CardSettings[4][2] = ConvertDropdownValue(Value)
-end; }) 
 
-Tab_3:CreateButton({
-    Name = "Summon Chosen Cards",
-    Callback = function()
-        UIModule.AbilitySelection(table.unpack(CardSettings, 1, #CardSettings))
-        task.wait(0.3)
-        local player = game:GetService("Players").LocalPlayer
-        for _, gui in pairs(player.PlayerGui:GetDescendants()) do
-            if gui.Name == "AbilitySelection" and gui:IsA("GuiObject") then
-                gui.ZIndex = 10
-            end
-        end
-        for _, gui in pairs(game:GetService("StarterGui"):GetDescendants()) do
-            if gui.Name == "AbilitySelection" and gui:IsA("GuiObject") then
-                gui.ZIndex = 10
-            end
-        end
-    end
+local AutoInjectCards = false
+Tab_3:CreateToggle({
+    Name = "Auto-Inject Cards";
+    CurrentValue = false;
+    Callback = function(Value)
+        AutoInjectCards = Value
+    end;
 })
 
-Tab_3:CreateSection("Spam Ability")
+game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams").DescendantAdded:Connect(function(descendant)
+    if descendant and descendant.Name == LP.Name and descendant.Parent.Name == "Survivor" and AutoInjectCards then
+        task.wait(8)
+        UIModule.AbilitySelection(unpack(CardSettings))
+    end
+end)
 
 local SpamAbility = "Hotdog"
 Tab_3:CreateDropdown({Name = "Ability to Spam"; Options = AbilityNames; CurrentOption = "Hotdog"; MultiSelection = false; Callback = function(Value)
