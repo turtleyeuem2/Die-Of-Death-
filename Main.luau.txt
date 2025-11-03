@@ -446,7 +446,7 @@ Tab_3:CreateSection("Get Cards")
 local CardSettings = {
     [1] = {[1]="Revolver",[2]="Caretaker"},
     [2] = {[1]="BonusPad",[2]="Caretaker"},
-    [3] = {[1]="Revolver",[2]="Punch"}
+    [3] = {[1]="Revolver",[2]="Punch"},
     [4] = {[1]="Dash",[2]="Punch"}
 }
 Tab_3:CreateLabel("First Card Settings")
