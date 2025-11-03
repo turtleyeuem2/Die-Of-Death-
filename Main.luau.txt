@@ -473,13 +473,13 @@ Tab_3:CreateDropdown({Name = "Second Ability"; Options = AbilityNames; CurrentOp
 CardSettings[3][2] = ConvertDropdownValue(Value)
 end; })
 
-Tab_3:CreateLabel("Third Card Settings")
+Tab_3:CreateLabel("Fourth Card Settings")
 Tab_3:CreateDropdown({Name = "First Ability"; Options = AbilityNames; CurrentOption = "Dash"; MultiSelection = false; Callback = function(Value)
 CardSettings[4][1] = ConvertDropdownValue(Value)
 end; })
 Tab_3:CreateDropdown({Name = "Second Ability"; Options = AbilityNames; CurrentOption = "Punch"; MultiSelection = false; Callback = function(Value)
 CardSettings[4][2] = ConvertDropdownValue(Value)
-end; })
+end; }) 
 
 Tab_3:CreateButton({Name = "Summon Chosen Cards"; Callback = function()
 UIModule.AbilitySelection(unpack(CardSettings))
