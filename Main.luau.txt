@@ -481,10 +481,12 @@ Tab_3:CreateDropdown({Name = "Second Ability"; Options = AbilityNames; CurrentOp
 CardSettings[4][2] = ConvertDropdownValue(Value)
 end; }) 
 
-Tab_3:CreateButton({Name = "Summon Chosen Cards"; Callback = function()
-UIModule.AbilitySelection(unpack(CardSettings))
-end; })
-
+Tab_3:CreateButton({
+    Name = "Summon Chosen Cards",
+    Callback = function()
+        UIModule.AbilitySelection(table.unpack(CardSettings, 1, #CardSettings))
+    end
+})
 
 Tab_3:CreateSection("Spam Ability")
 
