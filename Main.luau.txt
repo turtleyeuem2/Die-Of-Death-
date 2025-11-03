@@ -485,6 +485,18 @@ Tab_3:CreateButton({
     Name = "Summon Chosen Cards",
     Callback = function()
         UIModule.AbilitySelection(table.unpack(CardSettings, 1, #CardSettings))
+        task.wait(0.3)
+        local player = game:GetService("Players").LocalPlayer
+        for _, gui in pairs(player.PlayerGui:GetDescendants()) do
+            if gui.Name == "AbilitySelection" and gui:IsA("GuiObject") then
+                gui.ZIndex = 10
+            end
+        end
+        for _, gui in pairs(game:GetService("StarterGui"):GetDescendants()) do
+            if gui.Name == "AbilitySelection" and gui:IsA("GuiObject") then
+                gui.ZIndex = 10
+            end
+        end
     end
 })
 
