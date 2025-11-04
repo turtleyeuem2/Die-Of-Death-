@@ -269,7 +269,7 @@ local LP = game:GetService("Players").LocalPlayer
 Tab_1:CreateSection("Auto Injection")
 local AI_MaxStamina, AI_WalkSpeed, AI_SprintSpeed, AutoInjectStamina
 
-Tab_1:CreateLabel("Stamina settings will automatically be applied to your character 21.5 seconds after the round starts.")
+Tab_1:CreateLabel("Stamina settings will automatically be applied to your character 8 seconds after the round starts.")
 
 Tab_1:CreateToggle({
     Name = "Auto Inject";
@@ -316,7 +316,7 @@ game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams").De
     task.wait()
     if descendant.Name == LP.Name and AutoInjectStamina == true then
         if descendant.Parent.Name == "Survivor" or descendant.Parent.Name == "Killer" then
-            task.wait(21.5)
+            task.wait(8)
             pcall(function()
                 SetStaminaProperty("MaxStamina", AI_MaxStamina)
             end)
