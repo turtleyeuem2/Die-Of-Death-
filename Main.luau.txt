@@ -287,7 +287,7 @@ SetStaminaProperty("SprintSpeed", tonumber(Value))
 end; })
 
 Tab_1:CreateSection("Auto Injection")
-local AI_MaxStamina, AI_WalkSpeed, AI_SprintSpeed
+local AI_MaxStamina, AI_WalkSpeed, AI_SprintSpeed, AutoInjectStamina
 
 Tab_1:CreateLabel("Stamina settings will automatically be applied to your character 21.5 seconds after the round starts.")
 
@@ -307,9 +307,9 @@ Tab_1:CreateInput({Name = "Sprint Speed"; PlaceholderText = "Type Here!"; Number
 AI_SprintSpeed = Value
 end; })
 
-game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams"):WaitForChild("Survivor").ChildAdded:Connect(function()
+game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams").DescendantAdded:Connect(function(descendant)
 task.wait()
-if AutoInjectStamina == true then
+if descendant.Name == ""..LP.Name.."" and not descendant.Parent.Name == "Ghost" and AutoInjectStamina == true then
 task.wait(21.5)
 pcall(function()
 SetStaminaProperty("MaxStamina", AI_MaxStamina)
