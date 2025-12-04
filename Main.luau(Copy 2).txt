@@ -1947,130 +1947,22 @@ SetFrontFlip(true)
 
 
 
-local LP = game:GetService("Players").LocalPlayer
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Teams = game:GetService("Teams")
+local localPlayer = Players.LocalPlayer
 
 local Tab_9 = Window:CreateTab("Turtle Feature", 0)
-Tab_9:CreateParagraph({Title = "some things i do myself (no ai)", Content = ":p"})
-
-local AutoFixLag = false
-
-Tab_9:CreateToggle({
-    Name = "Auto-Fix Lag";
-    CurrentValue = false;
-    Callback = function(Value)
-        AutoFixLag = Value
-    end
-})
-
-local function RunFixLag()
-    local ToDisable = {
-	Textures = true,
-	VisualEffects = true,
-	Parts = true,
-	Particles = true,
-	Sky = true,
-
-	Fog = true 
-}
-
-local ToEnable = {
-	FullBright = false
-}
-
-local Stuff = {}
-
-for _, v in next, game:GetDescendants() do
-	if ToDisable.Parts then
-		if v:IsA("Part") or v:IsA("Union") or v:IsA("BasePart") then
-			v.Material = Enum.Material.SmoothPlastic
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.Particles then
-		if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") 
-		or v:IsA("Sparkles") or v:IsA("Fire") then
-			v.Enabled = false
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.VisualEffects then
-		if v:IsA("BloomEffect") or v:IsA("BlurEffect") 
-		or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
-			v.Enabled = false
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.Textures then
-		if v:IsA("Decal") or v:IsA("Texture") then
-			v.Texture = ""
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.Sky then
-		if v:IsA("Sky") then
-			v.Parent = nil
-			table.insert(Stuff, 1, v)
-		end
-	end
-end
-
-local Lighting = game:GetService("Lighting")
-
-if ToDisable.Fog then
-
-	Lighting.FogStart = math.huge
-	Lighting.FogEnd = math.huge
-	Lighting.FogColor = Color3.fromRGB(255, 255, 255)
-else
-
-	Lighting.FogStart = 0
-	Lighting.FogEnd = 100000
-	Lighting.FogColor = Color3.fromRGB(128, 128, 128)
-end
-
-if ToEnable.FullBright then
-	Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-	Lighting.Brightness = 5
-	Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
-	Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
-	Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
-	Lighting.Outlines = true
-end
-
-game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams"):WaitForChild("Killer").ChildAdded:Connect(function(child)
-    if AutoFixLag then
-        task.wait(0.003)
-        RunFixLag()
-    end
-end)
-
-Tab_9:CreateButton({
-    Name = "Run Fix Lag Now";
-    Callback = function()
-        RunFixLag()
-    end
-})
-
-local Tab_9 = Window:CreateTab("test", 0)
-Tab_9:CreateParagraph({Title = "test", Content = "test"})
+Tab_9:CreateParagraph({Title = "Animation Aim", Content = "Nhắm vào team Killer khi animation chạy"})
 
 local aimEnabled = false
 Tab_9:CreateToggle({
-    Name = "test";
+    Name = "Aim Toggle";
     CurrentValue = false;
     Callback = function(Value)
         aimEnabled = Value
     end
 })
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Teams = game:GetService("Teams")
-local localPlayer = Players.LocalPlayer
 
 local targetAnimationId = "rbxassetid://74108653904830"
 local killerTeam = Teams:WaitForChild("Killer")
@@ -2095,6 +1987,7 @@ local function setupCharacter(char)
 end
 
 if localPlayer.Character then
+    task.wait(0.1)
     setupCharacter(localPlayer.Character)
 end
 
@@ -2123,7 +2016,6 @@ RunService.RenderStepped:Connect(function()
         )
     end
 end)
-
 
 
 
