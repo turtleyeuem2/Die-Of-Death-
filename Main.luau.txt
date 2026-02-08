@@ -1958,7 +1958,10 @@ local KillerSwingAnimations = {
 "rbxassetid://128964298098050",
 "rbxassetid://104604097727634",
 "rbxassetid://92210511834390",
-"rbxassetid://80787680522855"
+"rbxassetid://80787680522855",
+"rbxassetid://101057309409457",
+"rbxassetid://131366682965730",
+"rbxassetid://89729648321106"
 }
 local currentKillerSwingConnection = nil
 local killerSwingActiveTracks = {}
@@ -1999,6 +2002,39 @@ end)
 return nearestSurvivor
 end
 
+local function GetNearestPlayerForSwing()
+local isDienation = false
+pcall(function()
+local gamemode = game:GetService("ReplicatedStorage"):WaitForChild("StringConfig"):WaitForChild("CurrentGamemode").Value
+if gamemode == "Dienation" then
+isDienation = true
+end
+end)
+if isDienation then
+local nearestPlayer = nil
+local shortestDistance = math.huge
+local nearestSurvivor = GetNearestSurvivor()
+local nearestKiller = GetNearestKiller()
+if nearestSurvivor then
+local survivorDistance = (HumanoidRootPart.Position - nearestSurvivor.HumanoidRootPart.Position).Magnitude
+if survivorDistance < shortestDistance then
+shortestDistance = survivorDistance
+nearestPlayer = nearestSurvivor
+end
+end
+if nearestKiller then
+local killerDistance = (HumanoidRootPart.Position - nearestKiller.HumanoidRootPart.Position).Magnitude
+if killerDistance < shortestDistance then
+shortestDistance = killerDistance
+nearestPlayer = nearestKiller
+end
+end
+return nearestPlayer
+else
+return GetNearestSurvivor()
+end
+end
+
 local function AimHRPToTarget(target)
 pcall(function()
 if target and target:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
@@ -2026,7 +2062,14 @@ end
 local function StartHRPAimbot()
 if currentAimbotConnection then
 currentAimbotConnection:Disconnect()
+currentAimbotConnection = nil
 end
+for track, _ in pairs(aimbotActiveTracks) do
+if track then
+pcall(function() track:Disconnect() end)
+end
+end
+aimbotActiveTracks = {}
 currentAimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
 if not HRPAimbotEnabled or not HumanoidRootPart then return end
 for _, animId in pairs(AimbotAnimations) do
@@ -2034,7 +2077,7 @@ local isPlaying, track = IsPlayingAnimation(animId)
 if isPlaying and track and not aimbotActiveTracks[track] then
 aimbotActiveTracks[track] = true
 task.spawn(function()
-while track.IsPlaying do
+while track and track.IsPlaying do
 local nearestKiller = GetNearestKiller()
 if nearestKiller then
 AimHRPToTarget(nearestKiller)
@@ -2052,7 +2095,14 @@ end
 local function StartKillerSwingAimbot()
 if currentKillerSwingConnection then
 currentKillerSwingConnection:Disconnect()
+currentKillerSwingConnection = nil
 end
+for track, _ in pairs(killerSwingActiveTracks) do
+if track then
+pcall(function() track:Disconnect() end)
+end
+end
+killerSwingActiveTracks = {}
 currentKillerSwingConnection = game:GetService("RunService").RenderStepped:Connect(function()
 if not KillerSwingAimbotEnabled or not HumanoidRootPart then return end
 for _, animId in pairs(KillerSwingAnimations) do
@@ -2060,10 +2110,10 @@ local isPlaying, track = IsPlayingAnimation(animId)
 if isPlaying and track and not killerSwingActiveTracks[track] then
 killerSwingActiveTracks[track] = true
 task.spawn(function()
-while track.IsPlaying do
-local nearestSurvivor = GetNearestSurvivor()
-if nearestSurvivor then
-AimHRPToTarget(nearestSurvivor)
+while track and track.IsPlaying do
+local nearestTarget = GetNearestPlayerForSwing()
+if nearestTarget then
+AimHRPToTarget(nearestTarget)
 end
 task.wait()
 end
@@ -2079,6 +2129,11 @@ local shiftLockConnection = nil
 local function Start360Healer()
 if currentHealerConnection then
 currentHealerConnection:Disconnect()
+currentHealerConnection = nil
+end
+if shiftLockConnection then
+shiftLockConnection:Disconnect()
+shiftLockConnection = nil
 end
 currentHealerConnection = game:GetService("RunService").RenderStepped:Connect(function()
 if not Healer360Enabled or not HumanoidRootPart or isSpinning then return end
@@ -2129,6 +2184,11 @@ if currentAimbotConnection then
 currentAimbotConnection:Disconnect()
 currentAimbotConnection = nil
 end
+for track, _ in pairs(aimbotActiveTracks) do
+if track then
+pcall(function() track:Disconnect() end)
+end
+end
 aimbotActiveTracks = {}
 Notify("Info", "HRP Aimbot Disabled!", 3, false)
 end
@@ -2143,6 +2203,11 @@ else
 if currentKillerSwingConnection then
 currentKillerSwingConnection:Disconnect()
 currentKillerSwingConnection = nil
+end
+for track, _ in pairs(killerSwingActiveTracks) do
+if track then
+pcall(function() track:Disconnect() end)
+end
 end
 killerSwingActiveTracks = {}
 Notify("Info", "Killer Swing HRP Aimbot Disabled!", 3, false)
