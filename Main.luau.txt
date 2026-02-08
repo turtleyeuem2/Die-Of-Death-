@@ -2075,6 +2075,7 @@ end
 end)
 end
 
+local shiftLockConnection = nil
 local function Start360Healer()
 if currentHealerConnection then
 currentHealerConnection:Disconnect()
@@ -2086,14 +2087,13 @@ if isPlaying then
 isSpinning = true
 task.spawn(function()
 local Camera = workspace.CurrentCamera
-local camConnection
-local originalCameraType = Camera.CameraType
-pcall(function()
-Camera.CameraType = Enum.CameraType.Scriptable
-local fixedCFrame = Camera.CFrame
-camConnection = game:GetService("RunService").RenderStepped:Connect(function()
-Camera.CFrame = fixedCFrame
-end)
+local wasAutoRotate = Humanoid.AutoRotate
+Humanoid.AutoRotate = false
+shiftLockConnection = game:GetService("RunService").RenderStepped:Connect(function()
+if HumanoidRootPart and Camera then
+local lookVector = Camera.CFrame.LookVector
+HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
+end
 end)
 local startTime = tick()
 local startCFrame = HumanoidRootPart.CFrame
@@ -2106,12 +2106,11 @@ HumanoidRootPart.CFrame = startCFrame * CFrame.Angles(0, math.rad(rotation), 0)
 end
 task.wait()
 end
-pcall(function()
-if camConnection then
-camConnection:Disconnect()
+if shiftLockConnection then
+shiftLockConnection:Disconnect()
+shiftLockConnection = nil
 end
-Camera.CameraType = originalCameraType
-end)
+Humanoid.AutoRotate = wasAutoRotate
 isSpinning = false
 end)
 end
@@ -2159,6 +2158,10 @@ else
 if currentHealerConnection then
 currentHealerConnection:Disconnect()
 currentHealerConnection = nil
+end
+if shiftLockConnection then
+shiftLockConnection:Disconnect()
+shiftLockConnection = nil
 end
 isSpinning = false
 Notify("Info", "360 Healer Disabled!", 3, false)
