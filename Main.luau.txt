@@ -2031,7 +2031,7 @@ currentAimbotConnection = game:GetService("RunService").RenderStepped:Connect(fu
 if not HRPAimbotEnabled or not HumanoidRootPart then return end
 for _, animId in pairs(AimbotAnimations) do
 local isPlaying, track = IsPlayingAnimation(animId)
-if isPlaying and not aimbotActiveTracks[track] then
+if isPlaying and track and not aimbotActiveTracks[track] then
 aimbotActiveTracks[track] = true
 task.spawn(function()
 while track.IsPlaying do
@@ -2057,7 +2057,7 @@ currentKillerSwingConnection = game:GetService("RunService").RenderStepped:Conne
 if not KillerSwingAimbotEnabled or not HumanoidRootPart then return end
 for _, animId in pairs(KillerSwingAnimations) do
 local isPlaying, track = IsPlayingAnimation(animId)
-if isPlaying and not killerSwingActiveTracks[track] then
+if isPlaying and track and not killerSwingActiveTracks[track] then
 killerSwingActiveTracks[track] = true
 task.spawn(function()
 while track.IsPlaying do
@@ -2085,6 +2085,16 @@ local isPlaying, track = IsPlayingAnimation(HealerAnimation)
 if isPlaying then
 isSpinning = true
 task.spawn(function()
+local Camera = workspace.CurrentCamera
+local camConnection
+local originalCameraType = Camera.CameraType
+pcall(function()
+Camera.CameraType = Enum.CameraType.Scriptable
+local fixedCFrame = Camera.CFrame
+camConnection = game:GetService("RunService").RenderStepped:Connect(function()
+Camera.CFrame = fixedCFrame
+end)
+end)
 local startTime = tick()
 local startCFrame = HumanoidRootPart.CFrame
 local duration = 0.15
@@ -2096,6 +2106,12 @@ HumanoidRootPart.CFrame = startCFrame * CFrame.Angles(0, math.rad(rotation), 0)
 end
 task.wait()
 end
+pcall(function()
+if camConnection then
+camConnection:Disconnect()
+end
+Camera.CameraType = originalCameraType
+end)
 isSpinning = false
 end)
 end
@@ -2146,100 +2162,6 @@ currentHealerConnection = nil
 end
 isSpinning = false
 Notify("Info", "360 Healer Disabled!", 3, false)
-end
-end; })
-
-Tab_8:CreateSection("Combat Features")
-
-Tab_8:CreateToggle({Name = "Ability HRP Aimbot"; CurrentValue = false; Callback = function(Value)
-HRPAimbotEnabled = Value
-if Value then
-StartHRPAimbot()
-Notify("Success!", "HRP Aimbot Enabled!", 3, true)
-else
-if currentAimbotConnection then
-currentAimbotConnection:Disconnect()
-currentAimbotConnection = nil
-end
-aimbotActiveTracks = {}
-Notify("Info", "HRP Aimbot Disabled!", 3, false)
-end
-end; })
-
-Tab_8:CreateToggle({Name = "360 Healer"; CurrentValue = false; Callback = function(Value)
-Healer360Enabled = Value
-if Value then
-Start360Healer()
-Notify("Success!", "360 Healer Enabled!", 3, true)
-else
-if currentHealerConnection then
-currentHealerConnection:Disconnect()
-currentHealerConnection = nil
-end
-isSpinning = false
-Notify("Info", "360 Healer Disabled!", 3, false)
-end
-end; })
-
-local KillerSwingAimbotEnabled = false
-local KillerSwingAnimation = "rbxassetid://80787680522855"
-local currentKillerSwingConnection = nil
-local killerSwingActiveTracks = {}
-
-local function GetNearestSurvivor()
-local nearestSurvivor = nil
-local shortestDistance = math.huge
-pcall(function()
-local survivorFolder = game:GetService("Workspace"):WaitForChild("GameAssets", 1):WaitForChild("Teams", 1):WaitForChild("Survivor", 1)
-for _, survivor in pairs(survivorFolder:GetChildren()) do
-if survivor:IsA("Model") and survivor:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
-local distance = (HumanoidRootPart.Position - survivor.HumanoidRootPart.Position).Magnitude
-if distance < shortestDistance then
-shortestDistance = distance
-nearestSurvivor = survivor
-end
-end
-end
-end)
-return nearestSurvivor
-end
-
-local function StartKillerSwingAimbot()
-if currentKillerSwingConnection then
-currentKillerSwingConnection:Disconnect()
-end
-currentKillerSwingConnection = game:GetService("RunService").RenderStepped:Connect(function()
-if not KillerSwingAimbotEnabled or not HumanoidRootPart then return end
-local isPlaying, track = IsPlayingAnimation(KillerSwingAnimation)
-if isPlaying and not killerSwingActiveTracks[track] then
-killerSwingActiveTracks[track] = true
-task.spawn(function()
-while track.IsPlaying do
-local nearestSurvivor = GetNearestSurvivor()
-if nearestSurvivor then
-AimHRPToTarget(nearestSurvivor)
-end
-task.wait()
-end
-task.wait(1)
-killerSwingActiveTracks[track] = nil
-end)
-end
-end)
-end
-
-Tab_8:CreateToggle({Name = "Killer Swing HRP Aimbot"; CurrentValue = false; Callback = function(Value)
-KillerSwingAimbotEnabled = Value
-if Value then
-StartKillerSwingAimbot()
-Notify("Success!", "Killer Swing HRP Aimbot Enabled!", 3, true)
-else
-if currentKillerSwingConnection then
-currentKillerSwingConnection:Disconnect()
-currentKillerSwingConnection = nil
-end
-killerSwingActiveTracks = {}
-Notify("Info", "Killer Swing HRP Aimbot Disabled!", 3, false)
 end
 end; })
 
