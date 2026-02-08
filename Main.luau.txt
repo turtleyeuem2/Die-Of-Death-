@@ -2042,7 +2042,7 @@ end
 
 Tab_8:CreateSection("Combat Features")
 
-Tab_8:CreateToggle({Name = "HRP Aimbot"; CurrentValue = false; Callback = function(Value)
+Tab_8:CreateToggle({Name = "Ability HRP Aimbot"; CurrentValue = false; Callback = function(Value)
 HRPAimbotEnabled = Value
 if Value then
 StartHRPAimbot()
@@ -2069,6 +2069,68 @@ currentHealerConnection = nil
 end
 isSpinning = false
 Notify("Info", "360 Healer Disabled!", 3, false)
+end
+end; })
+
+local KillerSwingAimbotEnabled = false
+local KillerSwingAnimation = "rbxassetid://80787680522855"
+local currentKillerSwingConnection = nil
+local killerSwingActiveTracks = {}
+
+local function GetNearestSurvivor()
+local nearestSurvivor = nil
+local shortestDistance = math.huge
+pcall(function()
+local survivorFolder = game:GetService("Workspace"):WaitForChild("GameAssets", 1):WaitForChild("Teams", 1):WaitForChild("Survivor", 1)
+for _, survivor in pairs(survivorFolder:GetChildren()) do
+if survivor:IsA("Model") and survivor:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
+local distance = (HumanoidRootPart.Position - survivor.HumanoidRootPart.Position).Magnitude
+if distance < shortestDistance then
+shortestDistance = distance
+nearestSurvivor = survivor
+end
+end
+end
+end)
+return nearestSurvivor
+end
+
+local function StartKillerSwingAimbot()
+if currentKillerSwingConnection then
+currentKillerSwingConnection:Disconnect()
+end
+currentKillerSwingConnection = game:GetService("RunService").RenderStepped:Connect(function()
+if not KillerSwingAimbotEnabled or not HumanoidRootPart then return end
+local isPlaying, track = IsPlayingAnimation(KillerSwingAnimation)
+if isPlaying and not killerSwingActiveTracks[track] then
+killerSwingActiveTracks[track] = true
+task.spawn(function()
+while track.IsPlaying do
+local nearestSurvivor = GetNearestSurvivor()
+if nearestSurvivor then
+AimHRPToTarget(nearestSurvivor)
+end
+task.wait()
+end
+task.wait(1)
+killerSwingActiveTracks[track] = nil
+end)
+end
+end)
+end
+
+Tab_8:CreateToggle({Name = "Killer Swing HRP Aimbot"; CurrentValue = false; Callback = function(Value)
+KillerSwingAimbotEnabled = Value
+if Value then
+StartKillerSwingAimbot()
+Notify("Success!", "Killer Swing HRP Aimbot Enabled!", 3, true)
+else
+if currentKillerSwingConnection then
+currentKillerSwingConnection:Disconnect()
+currentKillerSwingConnection = nil
+end
+killerSwingActiveTracks = {}
+Notify("Info", "Killer Swing HRP Aimbot Disabled!", 3, false)
 end
 end; })
 
