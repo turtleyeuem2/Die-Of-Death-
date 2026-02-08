@@ -1945,6 +1945,24 @@ local HealerAnimation = "rbxassetid://128767098320893"
 local currentHealerConnection = nil
 local isSpinning = false
 
+local KillerSwingAimbotEnabled = false
+local KillerSwingAnimations = {
+"rbxassetid://130037883107006",
+"rbxassetid://78618685223511",
+"rbxassetid://112345820433575",
+"rbxassetid://71896478910022",
+"rbxassetid://100896558622404",
+"rbxassetid://108527178823496",
+"rbxassetid://110762388652484",
+"rbxassetid://112076293590914",
+"rbxassetid://128964298098050",
+"rbxassetid://104604097727634",
+"rbxassetid://92210511834390",
+"rbxassetid://80787680522855"
+}
+local currentKillerSwingConnection = nil
+local killerSwingActiveTracks = {}
+
 local function GetNearestKiller()
 local nearestKiller = nil
 local shortestDistance = math.huge
@@ -1961,6 +1979,24 @@ end
 end
 end)
 return nearestKiller
+end
+
+local function GetNearestSurvivor()
+local nearestSurvivor = nil
+local shortestDistance = math.huge
+pcall(function()
+local survivorFolder = game:GetService("Workspace"):WaitForChild("GameAssets", 1):WaitForChild("Teams", 1):WaitForChild("Survivor", 1)
+for _, survivor in pairs(survivorFolder:GetChildren()) do
+if survivor:IsA("Model") and survivor:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
+local distance = (HumanoidRootPart.Position - survivor.HumanoidRootPart.Position).Magnitude
+if distance < shortestDistance then
+shortestDistance = distance
+nearestSurvivor = survivor
+end
+end
+end
+end)
+return nearestSurvivor
 end
 
 local function AimHRPToTarget(target)
@@ -2013,6 +2049,32 @@ end
 end)
 end
 
+local function StartKillerSwingAimbot()
+if currentKillerSwingConnection then
+currentKillerSwingConnection:Disconnect()
+end
+currentKillerSwingConnection = game:GetService("RunService").RenderStepped:Connect(function()
+if not KillerSwingAimbotEnabled or not HumanoidRootPart then return end
+for _, animId in pairs(KillerSwingAnimations) do
+local isPlaying, track = IsPlayingAnimation(animId)
+if isPlaying and not killerSwingActiveTracks[track] then
+killerSwingActiveTracks[track] = true
+task.spawn(function()
+while track.IsPlaying do
+local nearestSurvivor = GetNearestSurvivor()
+if nearestSurvivor then
+AimHRPToTarget(nearestSurvivor)
+end
+task.wait()
+end
+task.wait(1)
+killerSwingActiveTracks[track] = nil
+end)
+end
+end
+end)
+end
+
 local function Start360Healer()
 if currentHealerConnection then
 currentHealerConnection:Disconnect()
@@ -2039,6 +2101,53 @@ end)
 end
 end)
 end
+
+Tab_8:CreateSection("Combat Features")
+
+Tab_8:CreateToggle({Name = "HRP Aimbot"; CurrentValue = false; Callback = function(Value)
+HRPAimbotEnabled = Value
+if Value then
+StartHRPAimbot()
+Notify("Success!", "HRP Aimbot Enabled!", 3, true)
+else
+if currentAimbotConnection then
+currentAimbotConnection:Disconnect()
+currentAimbotConnection = nil
+end
+aimbotActiveTracks = {}
+Notify("Info", "HRP Aimbot Disabled!", 3, false)
+end
+end; })
+
+Tab_8:CreateToggle({Name = "Killer Swing HRP Aimbot"; CurrentValue = false; Callback = function(Value)
+KillerSwingAimbotEnabled = Value
+if Value then
+StartKillerSwingAimbot()
+Notify("Success!", "Killer Swing HRP Aimbot Enabled!", 3, true)
+else
+if currentKillerSwingConnection then
+currentKillerSwingConnection:Disconnect()
+currentKillerSwingConnection = nil
+end
+killerSwingActiveTracks = {}
+Notify("Info", "Killer Swing HRP Aimbot Disabled!", 3, false)
+end
+end; })
+
+Tab_8:CreateToggle({Name = "360 Healer"; CurrentValue = false; Callback = function(Value)
+Healer360Enabled = Value
+if Value then
+Start360Healer()
+Notify("Success!", "360 Healer Enabled!", 3, true)
+else
+if currentHealerConnection then
+currentHealerConnection:Disconnect()
+currentHealerConnection = nil
+end
+isSpinning = false
+Notify("Info", "360 Healer Disabled!", 3, false)
+end
+end; })
 
 Tab_8:CreateSection("Combat Features")
 
