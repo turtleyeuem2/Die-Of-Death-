@@ -1500,6 +1500,10 @@ return (MarketplaceService:GetProductInfo(Id,Enum.InfoType.Asset).PriceInRobux)
 end)
 end
 local PremiumPrice = GetAssetPrice(1264479709) or 39
+-- WAIT PLEASE LISTEN
+-- YOU CAN GET PREMIUM FOR FREE BY ENTERING A KEY
+-- KEY IS IN MY DISCORD SERVER 😭🙏
+-- AAAAAAH!!!!!!!!!!!!
 local HavePremium = true
 if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(LocalPlayer.UserId, 1264479709) then
 HavePremium = true
@@ -2113,81 +2117,30 @@ Tab_9:CreateToggle({
 
 local function RunFixLag()
     local ToDisable = {
-	Textures = true,
-	VisualEffects = true,
-	Parts = true,
-	Particles = true,
-	Sky = true,
+        Textures = true,
+        VisualEffects = true,
+        Parts = true,
+        Particles = true,
+        Sky = true
+    }
 
-	Fog = true 
-}
-
-local ToEnable = {
-	FullBright = false
-}
-
-local Stuff = {}
-
-for _, v in next, game:GetDescendants() do
-	if ToDisable.Parts then
-		if v:IsA("Part") or v:IsA("Union") or v:IsA("BasePart") then
-			v.Material = Enum.Material.SmoothPlastic
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.Particles then
-		if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") 
-		or v:IsA("Sparkles") or v:IsA("Fire") then
-			v.Enabled = false
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.VisualEffects then
-		if v:IsA("BloomEffect") or v:IsA("BlurEffect") 
-		or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
-			v.Enabled = false
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.Textures then
-		if v:IsA("Decal") or v:IsA("Texture") then
-			v.Texture = ""
-			table.insert(Stuff, 1, v)
-		end
-	end
-	
-	if ToDisable.Sky then
-		if v:IsA("Sky") then
-			v.Parent = nil
-			table.insert(Stuff, 1, v)
-		end
-	end
-end
-
-local Lighting = game:GetService("Lighting")
-
-if ToDisable.Fog then
-
-	Lighting.FogStart = math.huge
-	Lighting.FogEnd = math.huge
-	Lighting.FogColor = Color3.fromRGB(255, 255, 255)
-else
-
-	Lighting.FogStart = 0
-	Lighting.FogEnd = 100000
-	Lighting.FogColor = Color3.fromRGB(128, 128, 128)
-end
-
-if ToEnable.FullBright then
-	Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-	Lighting.Brightness = 5
-	Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
-	Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
-	Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
-	Lighting.Outlines = true
+    for _, v in next, game:GetDescendants() do
+        if ToDisable.Parts and (v:IsA("Part") or v:IsA("Union") or v:IsA("BasePart")) then
+            v.Material = Enum.Material.SmoothPlastic
+        end
+        if ToDisable.Particles and (v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") or v:IsA("Sparkles") or v:IsA("Fire")) then
+            v.Enabled = false
+        end
+        if ToDisable.VisualEffects and (v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect")) then
+            v.Enabled = false
+        end
+        if ToDisable.Textures and (v:IsA("Decal") or v:IsA("Texture")) then
+            v.Texture = ""
+        end
+        if ToDisable.Sky and v:IsA("Sky") then
+            v.Parent = nil
+        end
+    end
 end
 
 game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams"):WaitForChild("Killer").ChildAdded:Connect(function(child)
