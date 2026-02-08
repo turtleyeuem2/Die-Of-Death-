@@ -2025,7 +2025,7 @@ isSpinning = true
 task.spawn(function()
 local startTime = tick()
 local startCFrame = HumanoidRootPart.CFrame
-local duration = 0.15
+local duration = 0.5
 while tick() - startTime < duration do
 local elapsed = tick() - startTime
 local rotation = (elapsed / duration) * 360
