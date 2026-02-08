@@ -1500,10 +1500,6 @@ return (MarketplaceService:GetProductInfo(Id,Enum.InfoType.Asset).PriceInRobux)
 end)
 end
 local PremiumPrice = GetAssetPrice(1264479709) or 39
--- WAIT PLEASE LISTEN
--- YOU CAN GET PREMIUM FOR FREE BY ENTERING A KEY
--- KEY IS IN MY DISCORD SERVER 😭🙏
--- AAAAAAH!!!!!!!!!!!!
 local HavePremium = true
 if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(LocalPlayer.UserId, 1264479709) then
 HavePremium = true
@@ -1935,6 +1931,155 @@ SetFrontFlip(Value)
 end; })
 SetFrontFlip(true)
 
+local HRPAimbotEnabled = false
+local AimbotAnimations = {
+    "rbxassetid://124781750889573",
+    "rbxassetid://74108653904830",
+    "rbxassetid://113732291990231"
+}
+local currentAimbotConnection = nil
+
+local Healer360Enabled = false
+local HealerAnimation = "rbxassetid://128767098320893"
+local currentHealerConnection = nil
+
+local function GetNearestKiller()
+    local nearestKiller = nil
+    local shortestDistance = math.huge
+    
+    local killerFolder = game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams"):WaitForChild("Killer")
+    
+    for _, killer in pairs(killerFolder:GetChildren()) do
+        if killer:IsA("Model") and killer:FindFirstChild("HumanoidRootPart") then
+            local distance = (HumanoidRootPart.Position - killer.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestKiller = killer
+            end
+        end
+    end
+    
+    return nearestKiller
+end
+
+local function AimHRPToTarget(target)
+    if target and target:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
+        local targetPos = target.HumanoidRootPart.Position
+        local currentPos = HumanoidRootPart.Position
+        local direction = (targetPos - currentPos).Unit
+        
+        local newCFrame = CFrame.new(currentPos, currentPos + direction)
+        HumanoidRootPart.CFrame = newCFrame
+    end
+end
+
+local function Spin360(duration)
+    if not HumanoidRootPart then return end
+    
+    local startTime = tick()
+    local startCFrame = HumanoidRootPart.CFrame
+    
+    while tick() - startTime < duration do
+        local elapsed = tick() - startTime
+        local rotation = (elapsed / duration) * 360
+        
+        HumanoidRootPart.CFrame = startCFrame * CFrame.Angles(0, math.rad(rotation), 0)
+        task.wait()
+    end
+end
+
+local function IsPlayingAnimation(animationId)
+    if not Humanoid then return false end
+    
+    local animator = Humanoid:FindFirstChildOfClass("Animator")
+    if not animator then return false end
+    
+    for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+        if track.Animation and track.Animation.AnimationId == animationId then
+            return true, track
+        end
+    end
+    
+    return false
+end
+
+local function StartHRPAimbot()
+    if currentAimbotConnection then
+        currentAimbotConnection:Disconnect()
+    end
+    
+    currentAimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if not HRPAimbotEnabled or not HumanoidRootPart then return end
+        
+        for _, animId in pairs(AimbotAnimations) do
+            local isPlaying, track = IsPlayingAnimation(animId)
+            if isPlaying then
+                local nearestKiller = GetNearestKiller()
+                if nearestKiller then
+                    AimHRPToTarget(nearestKiller)
+                    
+                    track.Stopped:Wait()
+                    task.wait(1)
+                end
+                break
+            end
+        end
+    end)
+end
+
+local function Start360Healer()
+    if currentHealerConnection then
+        currentHealerConnection:Disconnect()
+    end
+    
+    currentHealerConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if not Healer360Enabled or not HumanoidRootPart then return end
+        
+        local isPlaying, track = IsPlayingAnimation(HealerAnimation)
+        if isPlaying then
+            Spin360(0.15) -- Quay 360 độ trong 0.15 giây
+            task.wait(0.15) -- Chờ cho đến khi hoàn thành
+        end
+    end)
+end
+
+Tab_8:CreateSection("Combat Features")
+
+Tab_8:CreateToggle({
+    Name = "HRP Aimbot", 
+    CurrentValue = false, 
+    Callback = function(Value)
+        HRPAimbotEnabled = Value
+        if Value then
+            StartHRPAimbot()
+            Notify("Success!", "HRP Aimbot Enabled!", 3, true)
+        else
+            if currentAimbotConnection then
+                currentAimbotConnection:Disconnect()
+                currentAimbotConnection = nil
+            end
+            Notify("Info", "HRP Aimbot Disabled!", 3, false)
+        end
+    end
+})
+
+Tab_8:CreateToggle({
+    Name = "360 Healer", 
+    CurrentValue = false, 
+    Callback = function(Value)
+        Healer360Enabled = Value
+        if Value then
+            Start360Healer()
+            Notify("Success!", "360 Healer Enabled!", 3, true)
+        else
+            if currentHealerConnection then
+                currentHealerConnection:Disconnect()
+                currentHealerConnection = nil
+            end
+            Notify("Info", "360 Healer Disabled!", 3, false)
+        end
+    end
+})
 
 
 
@@ -1968,30 +2113,81 @@ Tab_9:CreateToggle({
 
 local function RunFixLag()
     local ToDisable = {
-        Textures = true,
-        VisualEffects = true,
-        Parts = true,
-        Particles = true,
-        Sky = true
-    }
+	Textures = true,
+	VisualEffects = true,
+	Parts = true,
+	Particles = true,
+	Sky = true,
 
-    for _, v in next, game:GetDescendants() do
-        if ToDisable.Parts and (v:IsA("Part") or v:IsA("Union") or v:IsA("BasePart")) then
-            v.Material = Enum.Material.SmoothPlastic
-        end
-        if ToDisable.Particles and (v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") or v:IsA("Sparkles") or v:IsA("Fire")) then
-            v.Enabled = false
-        end
-        if ToDisable.VisualEffects and (v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect")) then
-            v.Enabled = false
-        end
-        if ToDisable.Textures and (v:IsA("Decal") or v:IsA("Texture")) then
-            v.Texture = ""
-        end
-        if ToDisable.Sky and v:IsA("Sky") then
-            v.Parent = nil
-        end
-    end
+	Fog = true 
+}
+
+local ToEnable = {
+	FullBright = false
+}
+
+local Stuff = {}
+
+for _, v in next, game:GetDescendants() do
+	if ToDisable.Parts then
+		if v:IsA("Part") or v:IsA("Union") or v:IsA("BasePart") then
+			v.Material = Enum.Material.SmoothPlastic
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.Particles then
+		if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") 
+		or v:IsA("Sparkles") or v:IsA("Fire") then
+			v.Enabled = false
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.VisualEffects then
+		if v:IsA("BloomEffect") or v:IsA("BlurEffect") 
+		or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
+			v.Enabled = false
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.Textures then
+		if v:IsA("Decal") or v:IsA("Texture") then
+			v.Texture = ""
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.Sky then
+		if v:IsA("Sky") then
+			v.Parent = nil
+			table.insert(Stuff, 1, v)
+		end
+	end
+end
+
+local Lighting = game:GetService("Lighting")
+
+if ToDisable.Fog then
+
+	Lighting.FogStart = math.huge
+	Lighting.FogEnd = math.huge
+	Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+else
+
+	Lighting.FogStart = 0
+	Lighting.FogEnd = 100000
+	Lighting.FogColor = Color3.fromRGB(128, 128, 128)
+end
+
+if ToEnable.FullBright then
+	Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+	Lighting.Brightness = 5
+	Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+	Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+	Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+	Lighting.Outlines = true
 end
 
 game:GetService("Workspace"):WaitForChild("GameAssets"):WaitForChild("Teams"):WaitForChild("Killer").ChildAdded:Connect(function(child)
