@@ -700,40 +700,35 @@ end
 pcall(function()
 local currentHP = plr_char.Humanoid.Health
 local teamName = plr_char.Parent.Name
-local espColor = Color3.new(1, 1, 1)
+local healthColor = Color3.new(1, 1, 1)
 if teamName == "Survivor" then
 if currentHP >= 76 then
-espColor = Color3.fromRGB(0, 255, 0)
+healthColor = Color3.fromRGB(0, 255, 0)
 elseif currentHP >= 51 then
-espColor = Color3.fromRGB(0, 255, 255)
+healthColor = Color3.fromRGB(144, 238, 144)
 elseif currentHP >= 26 then
-espColor = Color3.fromRGB(255, 165, 0)
+healthColor = Color3.fromRGB(255, 165, 0)
 elseif currentHP >= 1 then
-espColor = Color3.fromRGB(255, 0, 0)
+healthColor = Color3.fromRGB(255, 0, 0)
 else
-espColor = Color3.fromRGB(0, 0, 0)
+healthColor = Color3.fromRGB(0, 0, 0)
 end
 elseif teamName == "Killer" then
 if currentHP >= 751 then
-espColor = Color3.fromRGB(0, 255, 0)
+healthColor = Color3.fromRGB(0, 255, 0)
 elseif currentHP >= 501 then
-espColor = Color3.fromRGB(0, 255, 255)
+healthColor = Color3.fromRGB(144, 238, 144)
 elseif currentHP >= 251 then
-espColor = Color3.fromRGB(255, 165, 0)
+healthColor = Color3.fromRGB(255, 165, 0)
 elseif currentHP >= 1 then
-espColor = Color3.fromRGB(255, 0, 0)
+healthColor = Color3.fromRGB(255, 0, 0)
 else
-espColor = Color3.fromRGB(0, 0, 0)
+healthColor = Color3.fromRGB(0, 0, 0)
 end
 elseif teamName == "Ghost" then
-espColor = Color3.new(1, 1, 1)
+healthColor = Color3.new(1, 1, 1)
 end
-stat_text.TextColor3 = espColor
-for _, highlight in pairs(game:GetService("CoreGui"):WaitForChild("DOD_ESP_HANDLER"):FindFirstChild("sillyfolder_"..plr.Name):GetDescendants()) do
-if highlight:IsA("BoxHandleAdornment") then
-highlight.Color = BrickColor.new(espColor)
-end
-end
+stat_text.TextColor3 = healthColor
 stat_text.Text = ((_G.ESPshowusers == true and "Name: "..plr.Name.."") or "")..""..((_G.ESPshowusers == true and _G.ESPshowhealth == true and "\n") or "")..""..((_G.ESPshowhealth == true and "Health: "..math.floor(currentHP).."") or "")
 end)
 end)
