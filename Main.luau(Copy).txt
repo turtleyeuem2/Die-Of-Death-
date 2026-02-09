@@ -2252,11 +2252,12 @@ end
 aimbotActiveTracks = {}
 currentAimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
 if not HRPAimbotEnabled or not HumanoidRootPart then return end
-local foundAnimation = false
 for _, animId in pairs(AimbotAnimations) do
 local isPlaying, track = IsPlayingAnimation(animId)
+if isPlaying and track then
+print("ANIMATION DETECTED:", animId)
+end
 if isPlaying and track and not aimbotActiveTracks[track] then
-foundAnimation = true
 aimbotActiveTracks[track] = true
 task.spawn(function()
 while track and track.IsPlaying do
