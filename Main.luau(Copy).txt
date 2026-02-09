@@ -682,8 +682,8 @@ esp_stat.StudsOffset = Vector3.new(0, .2, 0)
 name_text.Name = "NameLabel"
 name_text.ZIndex = 10
 name_text.BackgroundTransparency = 1
-name_text.Position = UDim2.new(0, 0, 0, 0)
-name_text.Size = UDim2.new(0, 80, 0, 30)
+name_text.Position = UDim2.new(0, 0, 0, -50)
+name_text.Size = UDim2.new(0, 80, 0, 40)
 name_text.Font = Enum.Font.SourceSansSemibold
 name_text.TextSize = 15
 name_text.TextColor3 = Color3.new(1, 1, 1)
@@ -693,8 +693,8 @@ name_text.Parent = esp_stat
 health_text.Name = "HealthLabel"
 health_text.ZIndex = 10
 health_text.BackgroundTransparency = 1
-health_text.Position = UDim2.new(0, 0, 0, 30)
-health_text.Size = UDim2.new(0, 80, 0, 30)
+health_text.Position = UDim2.new(0, 0, 0, -10)
+health_text.Size = UDim2.new(0, 80, 0, 40)
 health_text.Font = Enum.Font.SourceSansSemibold
 health_text.TextSize = 15
 health_text.TextColor3 = Color3.new(1, 1, 1)
@@ -2305,9 +2305,12 @@ pcall(function()
 if target and target:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
 local targetPos = target.HumanoidRootPart.Position
 local currentPos = HumanoidRootPart.Position
-local direction = (targetPos - currentPos) * Vector3.new(1, 0, 1)
+local direction = Vector3.new(targetPos.X - currentPos.X, 0, targetPos.Z - currentPos.Z)
+if direction.Magnitude > 0 then
+direction = direction.Unit
 local newCFrame = CFrame.new(currentPos, currentPos + direction)
 HumanoidRootPart.CFrame = newCFrame
+end
 end
 end)
 end
