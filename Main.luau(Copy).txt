@@ -2135,7 +2135,11 @@ end; })
 SetFrontFlip(true)
 
 local HRPAimbotEnabled = false
-local AimbotAnimations = {"rbxassetid://124781750889573", "rbxassetid://74108653904830", "rbxassetid://113732291990231"}
+local AimbotAnimations = {
+"rbxassetid://74108653904830",
+"rbxassetid://124781750889573",
+"rbxassetid://113732291990231"
+}
 local currentAimbotConnection = nil
 local aimbotActiveTracks = {}
 
@@ -2146,21 +2150,26 @@ local isSpinning = false
 
 local KillerSwingAimbotEnabled = false
 local KillerSwingAnimations = {
-"rbxassetid://130037883107006",
-"rbxassetid://78618685223511",
-"rbxassetid://112345820433575",
-"rbxassetid://71896478910022",
-"rbxassetid://100896558622404",
-"rbxassetid://108527178823496",
-"rbxassetid://110762388652484",
-"rbxassetid://112076293590914",
-"rbxassetid://128964298098050",
 "rbxassetid://104604097727634",
 "rbxassetid://92210511834390",
+"rbxassetid://128964298098050",
 "rbxassetid://80787680522855",
-"rbxassetid://101057309409457",
+"rbxassetid://110762388652484",
+"rbxassetid://112076293590914",
+"rbxassetid://108527178823496",
+"rbxassetid://99333140295180",
+"rbxassetid://77146551800119",
+"rbxassetid://90169934219103",
+"rbxassetid://100896558622404",
+"rbxassetid://71896478910022",
+"rbxassetid://112345820433575",
+"rbxassetid://78618685223511",
+"rbxassetid://130037883107006",
+"rbxassetid://84565422738230",
 "rbxassetid://131366682965730",
-"rbxassetid://89729648321106"
+"rbxassetid://89729648321106",
+"rbxassetid://129130982334733",
+"rbxassetid://101057309409457"
 }
 local currentKillerSwingConnection = nil
 local killerSwingActiveTracks = {}
@@ -2273,10 +2282,8 @@ currentAimbotConnection = game:GetService("RunService").RenderStepped:Connect(fu
 if not HRPAimbotEnabled or not HumanoidRootPart then return end
 for _, animId in pairs(AimbotAnimations) do
 local isPlaying, track = IsPlayingAnimation(animId)
-if isPlaying and track then
-print("ANIMATION DETECTED:", animId)
-end
 if isPlaying and track and not aimbotActiveTracks[track] then
+print("DEBUG: Animation detected -", animId)
 aimbotActiveTracks[track] = true
 task.spawn(function()
 while track and track.IsPlaying do
