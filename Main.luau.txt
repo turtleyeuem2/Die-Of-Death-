@@ -838,6 +838,7 @@ Tab_4:CreateSection("ESP Objects")
 _G.ESPKillerPartsEnabled = false
 local killerPartESPConnections = {}
 local killerPartRemovalConnections = {}
+local killerPartCheckConnection = nil
 
 local killerPartsList = {
 {path = "workspace.GameAssets.Map.Config.KillerOnly.KillerDoor", name = "Killer Door"},
@@ -848,8 +849,11 @@ local killerPartsList = {
 {path = "workspace.GameAssets.Teams.Other.Puppet.Hurtbox", name = "Puppet"}
 }
 
+local activeESPParts = {}
+
 function CreateKillerPartESP(part, displayName)
 if not part or not part:IsA("BasePart") then return end
+if activeESPParts[part] then return end
 local espFolder = Instance.new("Folder")
 espFolder.Name = "KillerPartESP_"..displayName
 espFolder.Parent = game:GetService("CoreGui"):FindFirstChild("DOD_ESP_HANDLER")
@@ -875,15 +879,18 @@ textLabel.TextColor3 = Color3.new(1, 0, 0)
 textLabel.TextStrokeTransparency = 0
 textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
 textLabel.BackgroundTransparency = 1
-textLabel.Font = Enum.Font.SourceSansBold
+textLabel.Font = Enum.Font.SourceSansSemibold
 textLabel.TextSize = 15
 textLabel.Size = UDim2.new(1, 0, 1, 0)
+textLabel.Position = UDim2.new(0, 0, 0, -50)
+textLabel.TextYAlignment = Enum.TextYAlignment.Bottom
 textLabel.Parent = billboard
 local removalConnection = part.AncestryChanged:Connect(function()
 if not part:IsDescendantOf(workspace) then
 pcall(function()
 espFolder:Destroy()
 end)
+activeESPParts[part] = nil
 if removalConnection then
 removalConnection:Disconnect()
 removalConnection = nil
@@ -891,6 +898,8 @@ end
 end
 end)
 table.insert(killerPartRemovalConnections, removalConnection)
+table.insert(killerPartESPConnections, espFolder)
+activeESPParts[part] = true
 return espFolder
 end
 
@@ -905,17 +914,27 @@ return nil
 end
 end
 
-function EnableKillerPartESP()
-DisableKillerPartESP()
+function CheckAndCreateESP()
 for _, partData in pairs(killerPartsList) do
 local part = GetPartFromPath(partData.path)
-if part then
-local espFolder = CreateKillerPartESP(part, partData.name)
-if espFolder then
-table.insert(killerPartESPConnections, espFolder)
+if part and not activeESPParts[part] then
+CreateKillerPartESP(part, partData.name)
 end
 end
 end
+
+function EnableKillerPartESP()
+DisableKillerPartESP()
+CheckAndCreateESP()
+if killerPartCheckConnection then
+killerPartCheckConnection:Disconnect()
+killerPartCheckConnection = nil
+end
+killerPartCheckConnection = game:GetService("RunService").Heartbeat:Connect(function()
+if _G.ESPKillerPartsEnabled then
+CheckAndCreateESP()
+end
+end)
 end
 
 function DisableKillerPartESP()
@@ -935,6 +954,11 @@ end
 end)
 end
 killerPartRemovalConnections = {}
+activeESPParts = {}
+if killerPartCheckConnection then
+killerPartCheckConnection:Disconnect()
+killerPartCheckConnection = nil
+end
 end
 
 Tab_4:CreateToggle({Name = "ESP Killer Parts"; CurrentValue = false; Callback = function(Value)
