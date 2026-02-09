@@ -668,7 +668,7 @@ esp.AlwaysOnTop = true
 esp.ZIndex = 10 or 1
 esp.Size = v.Size
 esp.Transparency = (plr_char.Parent.Name == "Workspace" and 1) or tonumber(_G.ESPtransHandler)
-esp.Color = BrickColor.new("White")
+esp.Color = (plr_char.Parent.Name == "Killer" and BrickColor.new("Bright red")) or (plr_char.Parent.Name == "Ghost" and BrickColor.new("White")) or BrickColor.new("Bright green")
 esp.Parent = game:GetService("CoreGui"):WaitForChild("DOD_ESP_HANDLER"):FindFirstChild("sillyfolder_"..plr.Name)
 if v.Name == "Head" then
 local esp_stat = Instance.new("BillboardGui")
@@ -684,7 +684,8 @@ stat_text.Position = UDim2.new(0, 0, 0, -50)
 stat_text.Size = UDim2.new(0, 80, 0, 80)
 stat_text.Font = Enum.Font.SourceSansSemibold
 stat_text.TextSize = 15
-stat_text.TextColor3 = (plr_char.Parent.Name == "Killer" and Color3.fromRGB(255, 0, 0)) or (plr_char.Parent.Name == "Survivor" and Color3.fromRGB(0, 255, 0)) or Color3.fromRGB(255, 255, 255)
+stat_text.TextColor3 = Color3.new(1, 1, 1)
+stat_text.RichText = true
 stat_text.TextStrokeTransparency = 0
 stat_text.TextYAlignment = Enum.TextYAlignment.Bottom
 stat_text.Parent = esp_stat
@@ -725,12 +726,21 @@ healthColor = Color3.fromRGB(255, 0, 0)
 else
 healthColor = Color3.fromRGB(0, 0, 0)
 end
-elseif teamName == "Ghost" then
+else
 healthColor = Color3.new(1, 1, 1)
 end
-stat_text.TextColor3 = healthColor
-stat_text.Text = ((_G.ESPshowusers == true and "Name: "..plr.Name.."") or "")..""..((_G.ESPshowusers == true and _G.ESPshowhealth == true and "\n") or "")..""..((_G.ESPshowhealth == true and "Health: "..math.floor(currentHP).."") or "")
-end)
+local nameColor = (teamName == "Killer" and Color3.fromRGB(255, 0, 0)) or (teamName == "Survivor" and Color3.fromRGB(0, 255, 0)) or Color3.fromRGB(255, 255, 255)
+local nameText = (_G.ESPshowusers == true and "Name: "..plr.Name.."") or ""
+local healthText = (_G.ESPshowhealth == true and "Health: "..math.floor(currentHP).."") or ""
+if _G.ESPshowusers and _G.ESPshowhealth then
+stat_text.Text = '<font color="rgb('..nameColor.R*255 ..','..nameColor.G*255 ..','..nameColor.B*255 ..')">'..nameText..'</font>\n<font color="rgb('..healthColor.R*255 ..','..healthColor.G*255 ..','..healthColor.B*255 ..')">'..healthText..'</font>'
+elseif _G.ESPshowusers then
+stat_text.Text = '<font color="rgb('..nameColor.R*255 ..','..nameColor.G*255 ..','..nameColor.B*255 ..')">'..nameText..'</font>'
+elseif _G.ESPshowhealth then
+stat_text.Text = '<font color="rgb('..healthColor.R*255 ..','..healthColor.G*255 ..','..healthColor.B*255 ..')">'..healthText..'</font>'
+else
+stat_text.Text = ""
+end
 end)
 esp.AncestryChanged:Connect(function()
 if not esp:IsDescendantOf(game) then
