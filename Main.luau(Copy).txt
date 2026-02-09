@@ -841,12 +841,12 @@ local killerPartRemovalConnections = {}
 local killerPartCheckConnection = nil
 
 local killerPartsList = {
-{path = "workspace.GameAssets.Map.Config.KillerOnly.KillerDoor", name = "Killer Door"},
-{path = "workspace.GameAssets.Teams.Other.Killbot.Primary", name = "Killbot"},
-{path = "workspace.GameAssets.Teams.Other.Computer.Primary", name = "Computer"},
-{path = "workspace.GameAssets.Teams.Other.MusicBox.HumanoidRootPart", name = "Music Box"},
-{path = "workspace.GameAssets.Teams.Other.Wall.HumanoidRootPart", name = "Wall"},
-{path = "workspace.GameAssets.Teams.Other.Puppet.Hurtbox", name = "Puppet"}
+{path = "workspace.GameAssets.Map.Config.KillerOnly", name = "Killer Door", findChild = "KillerDoor"},
+{path = "workspace.GameAssets.Teams.Other", name = "Killbot", findChild = "Killbot", findInChild = "Primary"},
+{path = "workspace.GameAssets.Teams.Other", name = "Computer", findChild = "Computer", findInChild = "Primary"},
+{path = "workspace.GameAssets.Teams.Other", name = "Music Box", findChild = "MusicBox", findInChild = "HumanoidRootPart"},
+{path = "workspace.GameAssets.Teams.Other", name = "Wall", findChild = "Wall", findInChild = "HumanoidRootPart"},
+{path = "workspace.GameAssets.Teams.Other", name = "Puppet", findChild = "Puppet", findInChild = "Hurtbox"}
 }
 
 local activeESPParts = {}
@@ -916,9 +916,28 @@ end
 
 function CheckAndCreateESP()
 for _, partData in pairs(killerPartsList) do
-local part = GetPartFromPath(partData.path)
-if part and not activeESPParts[part] then
+local parentFolder = GetPartFromPath(partData.path)
+if parentFolder then
+if partData.findChild then
+for _, child in pairs(parentFolder:GetChildren()) do
+if child.Name == partData.findChild then
+if partData.findInChild then
+local part = child:FindFirstChild(partData.findInChild)
+if part and part:IsA("BasePart") and part:IsDescendantOf(workspace) and not activeESPParts[part] then
 CreateKillerPartESP(part, partData.name)
+end
+else
+if child:IsA("BasePart") and child:IsDescendantOf(workspace) and not activeESPParts[child] then
+CreateKillerPartESP(child, partData.name)
+end
+end
+end
+end
+else
+if parentFolder:IsA("BasePart") and parentFolder:IsDescendantOf(workspace) and not activeESPParts[parentFolder] then
+CreateKillerPartESP(parentFolder, partData.name)
+end
+end
 end
 end
 end
