@@ -733,11 +733,11 @@ local nameColor = (teamName == "Killer" and Color3.fromRGB(255, 0, 0)) or (teamN
 local nameText = (_G.ESPshowusers == true and "Name: "..plr.Name.."") or ""
 local healthText = (_G.ESPshowhealth == true and "Health: "..math.floor(currentHP).."") or ""
 if _G.ESPshowusers and _G.ESPshowhealth then
-stat_text.Text = '<font color="rgb('..nameColor.R*255 ..','..nameColor.G*255 ..','..nameColor.B*255 ..')">'..nameText..'</font>\n<font color="rgb('..healthColor.R*255 ..','..healthColor.G*255 ..','..healthColor.B*255 ..')">'..healthText..'</font>'
+stat_text.Text = '<font color="rgb('..math.floor(nameColor.R*255)..','..math.floor(nameColor.G*255)..','..math.floor(nameColor.B*255)..')">'..nameText..'</font>\n<font color="rgb('..math.floor(healthColor.R*255)..','..math.floor(healthColor.G*255)..','..math.floor(healthColor.B*255)..')">'..healthText..'</font>'
 elseif _G.ESPshowusers then
-stat_text.Text = '<font color="rgb('..nameColor.R*255 ..','..nameColor.G*255 ..','..nameColor.B*255 ..')">'..nameText..'</font>'
+stat_text.Text = '<font color="rgb('..math.floor(nameColor.R*255)..','..math.floor(nameColor.G*255)..','..math.floor(nameColor.B*255)..')">'..nameText..'</font>'
 elseif _G.ESPshowhealth then
-stat_text.Text = '<font color="rgb('..healthColor.R*255 ..','..healthColor.G*255 ..','..healthColor.B*255 ..')">'..healthText..'</font>'
+stat_text.Text = '<font color="rgb('..math.floor(healthColor.R*255)..','..math.floor(healthColor.G*255)..','..math.floor(healthColor.B*255)..')">'..healthText..'</font>'
 else
 stat_text.Text = ""
 end
