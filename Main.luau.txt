@@ -684,16 +684,30 @@ stat_text.Position = UDim2.new(0, 0, 0, -50)
 stat_text.Size = UDim2.new(0, 80, 0, 80)
 stat_text.Font = Enum.Font.SourceSansSemibold
 stat_text.TextSize = 15
-stat_text.TextColor3 = Color3.new(1, 1, 1)
+stat_text.TextColor3 = (plr_char.Parent.Name == "Killer" and Color3.fromRGB(255, 0, 0)) or (plr_char.Parent.Name == "Survivor" and Color3.fromRGB(0, 255, 0)) or Color3.fromRGB(255, 255, 255)
 stat_text.TextStrokeTransparency = 0
 stat_text.TextYAlignment = Enum.TextYAlignment.Bottom
 stat_text.Parent = esp_stat
-task.spawn(function()
-pcall(function()
-while task.wait(.05) do
-stat_text.Text = ((_G.ESPshowusers == true and "Name: "..plr.Name.."") or "")..""..((_G.ESPshowusers == true and _G.ESPshowhealth == true and "\n") or "")..""..((_G.ESPshowhealth == true and "Health: "..plr_char.Humanoid.Health.."") or "")
+local textUpdateConnection
+textUpdateConnection = game:GetService("RunService").RenderStepped:Connect(function()
+if not plr_char or not plr_char.Parent or not plr_char:FindFirstChild("Humanoid") then
+if textUpdateConnection then
+textUpdateConnection:Disconnect()
+textUpdateConnection = nil
 end
+return
+end
+pcall(function()
+stat_text.Text = ((_G.ESPshowusers == true and "Name: "..plr.Name.."") or "")..""..((_G.ESPshowusers == true and _G.ESPshowhealth == true and "\n") or "")..""..((_G.ESPshowhealth == true and "Health: "..plr_char.Humanoid.Health.."") or "")
 end)
+end)
+esp.AncestryChanged:Connect(function()
+if not esp:IsDescendantOf(game) then
+if textUpdateConnection then
+textUpdateConnection:Disconnect()
+textUpdateConnection = nil
+end
+end
 end)
 end
 
@@ -705,30 +719,57 @@ char_connection = plr.CharacterAdded:Connect(function()
 if game:GetService("CoreGui"):WaitForChild("DOD_ESP_HANDLER"):FindFirstChild("sillyfolder_"..plr.Name) then
 game:GetService("CoreGui"):WaitForChild("DOD_ESP_HANDLER"):FindFirstChild("sillyfolder_"..plr.Name):Destroy()
 end
+if dstr_connection then
 dstr_connection:Disconnect()
+dstr_connection = nil
+end
+if team_connection then
 team_connection:Disconnect()
+team_connection = nil
+end
 repeat task.wait(1.25) until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChildOfClass("Humanoid")
 CreateHighlight(plr)
+if char_connection then
 char_connection:Disconnect()
+char_connection = nil
+end
 end)
 
 team_connection = plr:GetPropertyChangedSignal("TeamColor"):Connect(function()
 if game:GetService("CoreGui"):WaitForChild("DOD_ESP_HANDLER"):FindFirstChild("sillyfolder_"..plr.Name) then
 game:GetService("CoreGui"):WaitForChild("DOD_ESP_HANDLER"):FindFirstChild("sillyfolder_"..plr.Name):Destroy()
 end
+if dstr_connection then
 dstr_connection:Disconnect()
+dstr_connection = nil
+end
+if char_connection then
 char_connection:Disconnect()
+char_connection = nil
+end
 repeat task.wait(1.25) until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChildOfClass("Humanoid")
 CreateHighlight(plr)
+if team_connection then
 team_connection:Disconnect()
+team_connection = nil
+end
 end)
 
 dstr_connection = game:GetService("CoreGui").ChildRemoved:Connect(function(child)
 if child.Name == "DOD_ESP_HANDLER" then
 Instance.new("Folder", game:GetService("CoreGui")).Name = "DOD_ESP_HANDLER"
+if team_connection then
 team_connection:Disconnect()
+team_connection = nil
+end
+if char_connection then
 char_connection:Disconnect()
+char_connection = nil
+end
+if dstr_connection then
 dstr_connection:Disconnect()
+dstr_connection = nil
+end
 end      
 end)
 
@@ -763,7 +804,7 @@ end; })
 
 plradded_esp = nil
 plrremoved_esp = nil
-Tab_4:CreateToggle({Name = "Turn On/Off ESP"; CurrentValue = false; Callback = function(Value)
+Tab_4:CreateToggle({Name = "Turn On/Off ESP Players"; CurrentValue = false; Callback = function(Value)
 _G.ESPenabledHandler = Value
 if _G.ESPenabledHandler == true then
 for i,v in pairs(game:GetService("Players"):GetPlayers()) do
@@ -789,6 +830,121 @@ if plrremoved_esp ~= nil then
 plrremoved_esp:Disconnect()
 plrremoved_esp = nil
 end
+end
+end; })
+
+Tab_4:CreateSection("ESP Objects")
+
+_G.ESPKillerPartsEnabled = false
+local killerPartESPConnections = {}
+local killerPartRemovalConnections = {}
+
+local killerPartsList = {
+{path = "workspace.GameAssets.Map.Config.KillerOnly.KillerDoor", name = "Killer Door"},
+{path = "workspace.GameAssets.Teams.Other.Killbot.Primary", name = "Killbot"},
+{path = "workspace.GameAssets.Teams.Other.Computer.Primary", name = "Computer"},
+{path = "workspace.GameAssets.Teams.Other.MusicBox.HumanoidRootPart", name = "Music Box"},
+{path = "workspace.GameAssets.Teams.Other.Wall.HumanoidRootPart", name = "Wall"},
+{path = "workspace.GameAssets.Teams.Other.Puppet.Hurtbox", name = "Puppet"}
+}
+
+function CreateKillerPartESP(part, displayName)
+if not part or not part:IsA("BasePart") then return end
+local espFolder = Instance.new("Folder")
+espFolder.Name = "KillerPartESP_"..displayName
+espFolder.Parent = game:GetService("CoreGui"):FindFirstChild("DOD_ESP_HANDLER")
+local highlight = Instance.new("BoxHandleAdornment")
+highlight.Name = "PartHighlight"
+highlight.Adornee = part
+highlight.AlwaysOnTop = true
+highlight.ZIndex = 10
+highlight.Size = part.Size
+highlight.Transparency = 0.3
+highlight.Color = BrickColor.new("Bright red")
+highlight.Parent = espFolder
+local billboard = Instance.new("BillboardGui")
+billboard.Name = "PartLabel"
+billboard.Adornee = part
+billboard.AlwaysOnTop = true
+billboard.Size = UDim2.new(0, 200, 0, 50)
+billboard.StudsOffset = Vector3.new(0, part.Size.Y / 2 + 2, 0)
+billboard.Parent = espFolder
+local textLabel = Instance.new("TextLabel")
+textLabel.Text = displayName
+textLabel.TextColor3 = Color3.new(1, 0, 0)
+textLabel.TextStrokeTransparency = 0
+textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.TextSize = 18
+textLabel.Size = UDim2.new(1, 0, 1, 0)
+textLabel.Parent = billboard
+local removalConnection = part.AncestryChanged:Connect(function()
+if not part:IsDescendantOf(workspace) then
+pcall(function()
+espFolder:Destroy()
+end)
+if removalConnection then
+removalConnection:Disconnect()
+removalConnection = nil
+end
+end
+end)
+table.insert(killerPartRemovalConnections, removalConnection)
+return espFolder
+end
+
+function GetPartFromPath(pathString)
+local success, result = pcall(function()
+return loadstring("return " .. pathString)()
+end)
+if success then
+return result
+else
+return nil
+end
+end
+
+function EnableKillerPartESP()
+DisableKillerPartESP()
+for _, partData in pairs(killerPartsList) do
+local part = GetPartFromPath(partData.path)
+if part then
+local espFolder = CreateKillerPartESP(part, partData.name)
+if espFolder then
+table.insert(killerPartESPConnections, espFolder)
+end
+end
+end
+end
+
+function DisableKillerPartESP()
+for _, espFolder in pairs(killerPartESPConnections) do
+pcall(function()
+if espFolder and espFolder.Parent then
+espFolder:Destroy()
+end
+end)
+end
+killerPartESPConnections = {}
+for _, connection in pairs(killerPartRemovalConnections) do
+pcall(function()
+if connection then
+connection:Disconnect()
+end
+end)
+end
+killerPartRemovalConnections = {}
+end
+
+Tab_4:CreateToggle({Name = "ESP Killer Parts"; CurrentValue = false; Callback = function(Value)
+_G.ESPKillerPartsEnabled = Value
+if Value then
+EnableKillerPartESP()
+Notify("Success!", "Killer Parts ESP Enabled!", 3, true)
+else
+DisableKillerPartESP()
+Notify("Info", "Killer Parts ESP Disabled!", 3, false)
 end
 end; })
 
