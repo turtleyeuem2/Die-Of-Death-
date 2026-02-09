@@ -2220,7 +2220,7 @@ pcall(function()
 if target and target:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
 local targetPos = target.HumanoidRootPart.Position
 local currentPos = HumanoidRootPart.Position
-local direction = (targetPos - currentPos).Unit
+local direction = (targetPos - currentPos) * Vector3.new(1, 0, 1)
 local newCFrame = CFrame.new(currentPos, currentPos + direction)
 HumanoidRootPart.CFrame = newCFrame
 end
