@@ -2252,25 +2252,7 @@ isDienation = true
 end
 end)
 if isDienation then
-local nearestPlayer = nil
-local shortestDistance = math.huge
-local nearestSurvivor = GetNearestSurvivor()
-local nearestKiller = GetNearestKiller()
-if nearestSurvivor then
-local survivorDistance = (HumanoidRootPart.Position - nearestSurvivor.HumanoidRootPart.Position).Magnitude
-if survivorDistance < shortestDistance then
-shortestDistance = survivorDistance
-nearestPlayer = nearestSurvivor
-end
-end
-if nearestKiller then
-local killerDistance = (HumanoidRootPart.Position - nearestKiller.HumanoidRootPart.Position).Magnitude
-if killerDistance < shortestDistance then
-shortestDistance = killerDistance
-nearestPlayer = nearestKiller
-end
-end
-return nearestPlayer
+return GetNearestKiller()
 else
 return GetNearestSurvivor()
 end
@@ -2368,7 +2350,7 @@ print("⚠️ HRP AIMBOT AUTO-RESET: Aimed for 10+ seconds!")
 aimbotActiveTracks[track] = nil
 break
 end
-local nearestTarget = GetNearestPlayerForAbility()
+local nearestTarget = GetNearestKiller()
 if nearestTarget then
 AimHRPToTarget(nearestTarget)
 end
