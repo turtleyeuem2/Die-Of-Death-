@@ -778,7 +778,7 @@ end
 
 function ChangeTransparency(trans)
 for i,v in pairs(game:GetService("CoreGui"):FindFirstChild("DOD_ESP_HANDLER"):GetDescendants()) do
-if v and v:IsA("BoxHandleAdornment") then
+if v and v:IsA("BoxHandleAdornment") and v.Name:match("^sillygirl_") then
 v.Transparency = trans
 end
 end
@@ -863,7 +863,7 @@ highlight.Adornee = part
 highlight.AlwaysOnTop = true
 highlight.ZIndex = 10
 highlight.Size = part.Size
-highlight.Transparency = 0.3
+highlight.Transparency = _G.ESPObjectTransparency or 0.85
 highlight.Color = BrickColor.new("Bright red")
 highlight.Parent = espFolder
 local billboard = Instance.new("BillboardGui")
@@ -922,8 +922,7 @@ for _, child in pairs(killerOnlyFolder:GetChildren()) do
 if child:IsA("Model") or child:IsA("Folder") then
 for _, part in pairs(child:GetDescendants()) do
 if part:IsA("BasePart") and not activeESPParts[part] then
-local displayName = child.Name
-CreateKillerPartESP(part, displayName)
+CreateKillerPartESP(part, "KillerDoor")
 end
 end
 elseif child:IsA("BasePart") and not activeESPParts[child] then
@@ -1011,6 +1010,17 @@ Notify("Success!", "Killer Parts ESP Enabled!", 3, true)
 else
 DisableKillerPartESP()
 Notify("Info", "Killer Parts ESP Disabled!", 3, false)
+end
+end; })
+
+_G.ESPObjectTransparency = 0.85
+
+Tab_4:CreateSlider({Name = "Object ESP Transparency (in %)"; Range = {0, 100}; Increment = 5; Suffix = "%"; CurrentValue = 85; Callback = function(Value)
+_G.ESPObjectTransparency = (tonumber(Value) / 100)
+for i,v in pairs(game:GetService("CoreGui"):FindFirstChild("DOD_ESP_HANDLER"):GetDescendants()) do
+if v and v:IsA("BoxHandleAdornment") and v.Name == "PartHighlight" then
+v.Transparency = _G.ESPObjectTransparency
+end
 end
 end; })
 
@@ -2339,12 +2349,25 @@ end
 aimbotActiveTracks = {}
 currentAimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
 if not HRPAimbotEnabled or not HumanoidRootPart then return end
+local myTeam = nil
+pcall(function()
+if Character and Character.Parent then
+myTeam = Character.Parent.Name
+end
+end)
+if myTeam ~= "Survivor" then return end
 for _, animId in pairs(AimbotAnimations) do
 local isPlaying, track = IsPlayingAnimation(animId)
 if isPlaying and track and not aimbotActiveTracks[track] then
-aimbotActiveTracks[track] = true
+aimbotActiveTracks[track] = {active = true, startTime = tick()}
 task.spawn(function()
 while track and track.IsPlaying do
+local aimDuration = tick() - aimbotActiveTracks[track].startTime
+if aimDuration > 10 then
+print("⚠️ HRP AIMBOT AUTO-RESET: Aimed for 10+ seconds!")
+aimbotActiveTracks[track] = nil
+break
+end
 local nearestTarget = GetNearestPlayerForAbility()
 if nearestTarget then
 AimHRPToTarget(nearestTarget)
@@ -2376,9 +2399,15 @@ if not KillerSwingAimbotEnabled or not HumanoidRootPart then return end
 for _, animId in pairs(KillerSwingAnimations) do
 local isPlaying, track = IsPlayingAnimation(animId)
 if isPlaying and track and not killerSwingActiveTracks[track] then
-killerSwingActiveTracks[track] = true
+killerSwingActiveTracks[track] = {active = true, startTime = tick()}
 task.spawn(function()
 while track and track.IsPlaying do
+local aimDuration = tick() - killerSwingActiveTracks[track].startTime
+if aimDuration > 10 then
+print("⚠️ KILLER SWING AIMBOT AUTO-RESET: Aimed for 10+ seconds!")
+killerSwingActiveTracks[track] = nil
+break
+end
 local nearestTarget = GetNearestPlayerForSwing()
 if nearestTarget then
 AimHRPToTarget(nearestTarget)
@@ -2388,6 +2417,7 @@ end
 task.wait(1)
 killerSwingActiveTracks[track] = nil
 end)
+break
 end
 end
 end)
@@ -2442,7 +2472,7 @@ end
 
 Tab_8:CreateSection("Combat Features")
 
-Tab_8:CreateToggle({Name = "HRP Aimbot"; CurrentValue = false; Callback = function(Value)
+Tab_8:CreateToggle({Name = "Survivor Ability HRP Aimbot"; CurrentValue = false; Callback = function(Value)
 HRPAimbotEnabled = Value
 if Value then
 StartHRPAimbot()
@@ -2452,9 +2482,11 @@ if currentAimbotConnection then
 currentAimbotConnection:Disconnect()
 currentAimbotConnection = nil
 end
-for track, _ in pairs(aimbotActiveTracks) do
-if track then
-pcall(function() track:Disconnect() end)
+for track, data in pairs(aimbotActiveTracks) do
+if data and data.connection then
+pcall(function() 
+data.connection:Disconnect()
+end)
 end
 end
 aimbotActiveTracks = {}
