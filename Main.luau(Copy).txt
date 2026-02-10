@@ -915,31 +915,44 @@ end
 end
 
 function CheckAndCreateESP()
-for _, partData in pairs(killerPartsList) do
-local parentFolder = GetPartFromPath(partData.path)
-if parentFolder then
-if partData.findChild then
-for _, child in pairs(parentFolder:GetChildren()) do
-if child.Name == partData.findChild then
-if partData.findInChild then
-local part = child:FindFirstChild(partData.findInChild)
-if part and part:IsA("BasePart") and part:IsDescendantOf(workspace) and not activeESPParts[part] then
-CreateKillerPartESP(part, partData.name)
+pcall(function()
+local killerOnlyFolder = game:GetService("Workspace"):WaitForChild("GameAssets", 1):WaitForChild("Map", 1):WaitForChild("Config", 1):WaitForChild("KillerOnly", 1)
+if killerOnlyFolder then
+for _, child in pairs(killerOnlyFolder:GetChildren()) do
+if child:IsA("Model") or child:IsA("Folder") then
+for _, part in pairs(child:GetDescendants()) do
+if part:IsA("BasePart") and not activeESPParts[part] then
+local displayName = child.Name
+CreateKillerPartESP(part, displayName)
 end
-else
-if child:IsA("BasePart") and child:IsDescendantOf(workspace) and not activeESPParts[child] then
-CreateKillerPartESP(child, partData.name)
 end
+elseif child:IsA("BasePart") and not activeESPParts[child] then
+CreateKillerPartESP(child, child.Name)
 end
 end
 end
-else
-if parentFolder:IsA("BasePart") and parentFolder:IsDescendantOf(workspace) and not activeESPParts[parentFolder] then
-CreateKillerPartESP(parentFolder, partData.name)
+end)
+pcall(function()
+local otherFolder = game:GetService("Workspace"):WaitForChild("GameAssets", 1):WaitForChild("Teams", 1):WaitForChild("Other", 1)
+if otherFolder then
+local targets = {
+{parent = "Killbot", part = "Primary", name = "Killbot"},
+{parent = "Computer", part = "Primary", name = "Computer"},
+{parent = "MusicBox", part = "HumanoidRootPart", name = "Music Box"},
+{parent = "Wall", part = "HumanoidRootPart", name = "Wall"},
+{parent = "Puppet", part = "Hurtbox", name = "Puppet"}
+}
+for _, data in pairs(targets) do
+local obj = otherFolder:FindFirstChild(data.parent)
+if obj then
+local part = obj:FindFirstChild(data.part)
+if part and not activeESPParts[part] then
+CreateKillerPartESP(part, data.name)
 end
 end
 end
 end
+end)
 end
 
 function EnableKillerPartESP()
