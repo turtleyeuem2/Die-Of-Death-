@@ -2243,6 +2243,39 @@ return GetNearestSurvivor()
 end
 end
 
+local function GetNearestPlayerForAbility()
+local isDienation = false
+pcall(function()
+local gamemode = game:GetService("ReplicatedStorage"):WaitForChild("StringConfig"):WaitForChild("CurrentGamemode").Value
+if gamemode == "Dienation" then
+isDienation = true
+end
+end)
+if isDienation then
+local nearestPlayer = nil
+local shortestDistance = math.huge
+local nearestSurvivor = GetNearestSurvivor()
+local nearestKiller = GetNearestKiller()
+if nearestSurvivor then
+local survivorDistance = (HumanoidRootPart.Position - nearestSurvivor.HumanoidRootPart.Position).Magnitude
+if survivorDistance < shortestDistance then
+shortestDistance = survivorDistance
+nearestPlayer = nearestSurvivor
+end
+end
+if nearestKiller then
+local killerDistance = (HumanoidRootPart.Position - nearestKiller.HumanoidRootPart.Position).Magnitude
+if killerDistance < shortestDistance then
+shortestDistance = killerDistance
+nearestPlayer = nearestKiller
+end
+end
+return nearestPlayer
+else
+return GetNearestKiller()
+end
+end
+
 local function AimHRPToTarget(target)
 pcall(function()
 if target and target:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
@@ -2289,9 +2322,9 @@ if isPlaying and track and not aimbotActiveTracks[track] then
 aimbotActiveTracks[track] = true
 task.spawn(function()
 while track and track.IsPlaying do
-local nearestKiller = GetNearestKiller()
-if nearestKiller then
-AimHRPToTarget(nearestKiller)
+local nearestTarget = GetNearestPlayerForAbility()
+if nearestTarget then
+AimHRPToTarget(nearestTarget)
 end
 task.wait()
 end
