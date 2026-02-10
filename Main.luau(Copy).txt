@@ -672,35 +672,22 @@ esp.Color = (plr_char.Parent.Name == "Killer" and BrickColor.new("Bright red")) 
 esp.Parent = game:GetService("CoreGui"):WaitForChild("DOD_ESP_HANDLER"):FindFirstChild("sillyfolder_"..plr.Name)
 if v.Name == "Head" then
 local esp_stat = Instance.new("BillboardGui")
-local name_text = Instance.new("TextLabel")
-local health_text = Instance.new("TextLabel")
+local stat_text = Instance.new("TextLabel")
 esp_stat.Adornee = v
 esp_stat.AlwaysOnTop = true
 esp_stat.Parent = esp
 esp_stat.Size = UDim2.new(0, 80, 0, 50)
-esp_stat.StudsOffset = Vector3.new(0, 2, 0)
-name_text.Name = "NameLabel"
-name_text.ZIndex = 10
-name_text.BackgroundTransparency = 1
-name_text.Position = UDim2.new(0, 0, 0, 10)
-name_text.Size = UDim2.new(0, 80, 0, 40)
-name_text.Font = Enum.Font.SourceSansSemibold
-name_text.TextSize = 15
-name_text.TextColor3 = Color3.new(1, 1, 1)
-name_text.TextStrokeTransparency = 0
-name_text.TextYAlignment = Enum.TextYAlignment.Bottom
-name_text.Parent = esp_stat
-health_text.Name = "HealthLabel"
-health_text.ZIndex = 9
-health_text.BackgroundTransparency = 1
-health_text.Position = UDim2.new(0, 0, 0, 40)
-health_text.Size = UDim2.new(0, 80, 0, 20)
-health_text.Font = Enum.Font.SourceSansSemibold
-health_text.TextSize = 15
-health_text.TextColor3 = Color3.new(1, 1, 1)
-health_text.TextStrokeTransparency = 0
-health_text.TextYAlignment = Enum.TextYAlignment.Top
-health_text.Parent = esp_stat
+esp_stat.StudsOffset = Vector3.new(0, .2, 0)
+stat_text.ZIndex = 10
+stat_text.BackgroundTransparency = 1
+stat_text.Position = UDim2.new(0, 0, 0, -50)
+stat_text.Size = UDim2.new(0, 80, 0, 80)
+stat_text.Font = Enum.Font.SourceSansSemibold
+stat_text.TextSize = 15
+stat_text.TextColor3 = (plr_char.Parent.Name == "Killer" and Color3.fromRGB(255, 0, 0)) or (plr_char.Parent.Name == "Survivor" and Color3.fromRGB(0, 255, 0)) or Color3.fromRGB(255, 255, 255)
+stat_text.TextStrokeTransparency = 0
+stat_text.TextYAlignment = Enum.TextYAlignment.Bottom
+stat_text.Parent = esp_stat
 local textUpdateConnection
 textUpdateConnection = game:GetService("RunService").RenderStepped:Connect(function()
 if not plr_char or not plr_char.Parent or not plr_char:FindFirstChild("Humanoid") then
@@ -711,51 +698,7 @@ end
 return
 end
 pcall(function()
-local currentHP = plr_char.Humanoid.Health
-local teamName = plr_char.Parent.Name
-local healthColor = Color3.new(1, 1, 1)
-if teamName == "Survivor" then
-if currentHP >= 76 then
-healthColor = Color3.fromRGB(0, 255, 0)
-elseif currentHP >= 51 then
-healthColor = Color3.fromRGB(144, 238, 144)
-elseif currentHP >= 26 then
-healthColor = Color3.fromRGB(255, 165, 0)
-elseif currentHP >= 1 then
-healthColor = Color3.fromRGB(255, 0, 0)
-else
-healthColor = Color3.fromRGB(0, 0, 0)
-end
-elseif teamName == "Killer" then
-if currentHP >= 751 then
-healthColor = Color3.fromRGB(0, 255, 0)
-elseif currentHP >= 501 then
-healthColor = Color3.fromRGB(144, 238, 144)
-elseif currentHP >= 251 then
-healthColor = Color3.fromRGB(255, 165, 0)
-elseif currentHP >= 1 then
-healthColor = Color3.fromRGB(255, 0, 0)
-else
-healthColor = Color3.fromRGB(0, 0, 0)
-end
-else
-healthColor = Color3.new(1, 1, 1)
-end
-local nameColor = (teamName == "Killer" and Color3.fromRGB(255, 0, 0)) or (teamName == "Survivor" and Color3.fromRGB(0, 255, 0)) or Color3.fromRGB(255, 255, 255)
-if _G.ESPshowusers then
-name_text.Text = "Name: "..plr.Name
-name_text.TextColor3 = nameColor
-name_text.Visible = true
-else
-name_text.Visible = false
-end
-if _G.ESPshowhealth then
-health_text.Text = "Health: "..math.floor(currentHP)
-health_text.TextColor3 = healthColor
-health_text.Visible = true
-else
-health_text.Visible = false
-end
+stat_text.Text = ((_G.ESPshowusers == true and "Name: "..plr.Name.."") or "")..""..((_G.ESPshowusers == true and _G.ESPshowhealth == true and "\n") or "")..""..((_G.ESPshowhealth == true and "Health: "..plr_char.Humanoid.Health.."") or "")
 end)
 end)
 esp.AncestryChanged:Connect(function()
